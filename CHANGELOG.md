@@ -1,6 +1,9 @@
 # Plugin Vite Changelog
 
-## 1.0.35 - UNRELEASED
+## 1.0.35 - 2024.06.12
+### Added
+* By default, only load the Vite AssetBundle if the request is a CP request or a preview request. This can be overridden via the `useForAllRequests` VitePluginService property ([#27](https://github.com/nystudio107/craft-plugin-vite/issues/27))
+
 ### Fixed
 * Normalize file system paths before fetching them with `file_get_contents()` ([#25](https://github.com/nystudio107/craft-plugin-vite/pull/25))
 
