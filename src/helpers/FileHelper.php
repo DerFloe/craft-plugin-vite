@@ -11,6 +11,7 @@
 namespace nystudio107\pluginvite\helpers;
 
 use Craft;
+use craft\helpers\FileHelper as CraftFileHelper;
 use craft\helpers\UrlHelper;
 use GuzzleHttp\Client;
 use GuzzleHttp\RequestOptions;
@@ -85,6 +86,8 @@ class FileHelper
                         $contents = $response->getBody()->getContents();
                     }
                 } else {
+                    // If this is a file path, normalize it first
+                    $pathOrUrl = CraftFileHelper::normalizePath($pathOrUrl);
                     $contents = @file_get_contents($pathOrUrl);
                 }
                 if ($contents && $callback) {

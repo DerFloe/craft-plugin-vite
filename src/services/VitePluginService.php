@@ -41,6 +41,20 @@ class VitePluginService extends ViteService
     public string $pluginDevServerEnvVar = 'VITE_PLUGIN_DEVSERVER';
 
     /**
+     * @var bool Normally the AssetBundle only needs to be registered for CP and Preview requests, and having it
+     *           not load for frontend requests saves a db write: https://github.com/nystudio107/craft-plugin-vite/issues/27
+     */
+    public bool $useForAllRequests = false;
+
+    /**
+     * @var array|string[] If the first segment of the request matches any items in the array, load the AssetBundle, too.
+     *                      Needed for things that add frontend preview targets like SEOmatic
+     */
+    public array $firstSegmentRequests = [
+        'seomatic',
+    ];
+
+    /**
      * @inheritDoc
      */
     public function init(): void
@@ -51,6 +65,7 @@ class VitePluginService extends ViteService
             $this->useDevServer = false;
         }
         parent::init();
+        // If this isn't a CP request,
         // If we're in a plugin, make sure the caches are unique
         if ($this->assetClass) {
             $this->cacheKeySuffix = $this->assetClass;
@@ -61,6 +76,14 @@ class VitePluginService extends ViteService
         // If we have no asset bundle class, or the dev server is running, don't swap in our `/cpresources/` paths
         if (!$this->assetClass || $this->devServerRunning()) {
             return;
+        }
+        // The Vite service is generally only needed for CP requests & previews, save a db write, see:
+        // https://github.com/nystudio107/craft-plugin-vite/issues/27
+        $request = Craft::$app->getRequest();
+        if (!$this->useForAllRequests && !$request->getIsConsoleRequest()) {
+            if (!$request->getIsCpRequest() && !$request->getIsPreview() && !in_array($request->getSegment(1), $this->firstSegmentRequests, true)) {
+                return;
+            }
         }
         // Map the $manifestPath and $serverPublic to the hashed `/cpresources/` path & URL for our AssetBundle
         $bundle = new $this->assetClass();
