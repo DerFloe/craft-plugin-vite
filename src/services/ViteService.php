@@ -143,6 +143,13 @@ class ViteService extends Component
      */
     public function register(string $path, bool $asyncCss = true, array $scriptTagAttrs = [], array $cssTagAttrs = [])
     {
+        // Filter out empty attributes, but preserve boolean values
+        $preserveBools = function($value) {
+            return is_bool($value) || !empty($value);
+        };
+        $scriptTagAttrs = array_filter($scriptTagAttrs, $preserveBools);
+        $cssTagAttrs = array_filter($cssTagAttrs, $preserveBools);
+
         if ($this->devServerRunning()) {
             $this->devServerRegister($path, $scriptTagAttrs);
 
@@ -408,6 +415,13 @@ class ViteService extends Component
      */
     public function script(string $path, bool $asyncCss = true, array $scriptTagAttrs = [], array $cssTagAttrs = []): string
     {
+        // Filter out empty attributes, but preserve boolean values
+        $preserveBools = function($value) {
+            return is_bool($value) || !empty($value);
+        };
+        $scriptTagAttrs = array_filter($scriptTagAttrs, $preserveBools);
+        $cssTagAttrs = array_filter($cssTagAttrs, $preserveBools);
+
         if ($this->devServerRunning()) {
             return $this->devServerScript($path, $scriptTagAttrs);
         }
